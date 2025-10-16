@@ -110,18 +110,18 @@ rag_manager = RAGManager(
 
 # Загружаем базу знаний из CSV файла
 knowledge_base_path = "documents/legal_knowledge_base.csv"
-if os.path.exists(knowledge_base_path):
-    print("📚 Загружаем базу знаний с парами вопрос-ответ...")
-    success = rag_manager.add_documents_from_csv(
-        csv_path=knowledge_base_path,
-        text_columns=["question", "answer"]
-    )
-    if success:
-        print("✅ База знаний с парами вопрос-ответ успешно загружена")
-    else:
-        print("❌ Ошибка при загрузке базы знаний")
-else:
-    print("⚠️ Файл базы знаний не найден, RAG будет работать без предзагруженных данных")
+# if os.path.exists(knowledge_base_path):
+#     print("📚 Загружаем базу знаний с парами вопрос-ответ...")
+#     success = rag_manager.add_documents_from_csv(
+        # csv_path=knowledge_base_path,
+        # text_columns=["question", "answer"]
+    # )
+#     if success:
+#         print("✅ База знаний с парами вопрос-ответ успешно загружена")
+#     else:
+#         print("❌ Ошибка при загрузке базы знаний")
+# else:
+#     print("⚠️ Файл базы знаний не найден, RAG будет работать без предзагруженных данных")
 
 # Инициализация Telegram-бота
 bot = Bot(token=TELEGRAM_TOKEN)
