@@ -1,12 +1,20 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap'
 
-createApp(App).mount('#app')
+import { createBootstrap } from 'bootstrap-vue-next'
+import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
+import './assets/styles/themes.css'
+
+const app = createApp(App)
+app.use(createBootstrap())
+app.mount('#app')
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
             .then(() => {})
-            .catch(err => console.log('SW failed:', err));
+            .catch(err => console.error('SW failed:', err));
     });
 }
