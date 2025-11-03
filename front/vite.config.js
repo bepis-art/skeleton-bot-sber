@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import vue from '@vue/compiler-sfc'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
@@ -7,27 +7,19 @@ export default defineConfig({
         vue(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
             manifest: {
                 name: 'ИИ спасатель',
                 short_name: 'Спасатель',
                 description: 'Бот ИИ спасатель',
-                theme_color: '#ffffff',
+                start_url: '/',
+                display: 'standalone',
+                background_color: '#ffffff',
+                theme_color: '#4DBA87',
                 icons: [
-                    {
-                        src: 'pwa-192x192.png',
-                        sizes: '192x192',
-                        type: 'image/png'
-                    },
-                    {
-                        src: 'pwa-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png'
-                    }
+                    { src: 'img/icons/72.png', sizes: '72x72', type: 'image/png' },
+                    { src: 'img/icons/192.png', sizes: '192x192', type: 'image/png' },
+                    { src: 'img/icons/512.png', sizes: '512x512', type: 'image/png' }
                 ]
-            },
-            workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg}']
             }
         })
     ]
