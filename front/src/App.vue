@@ -1,6 +1,5 @@
 <template>
-    <Header/>
-    <Main/>
+    <router-view/>
     <Footer/>
 </template>
 
@@ -16,7 +15,7 @@ export default {
         Header,
         Footer
     }
-}
+};
 </script>
 
 <style>

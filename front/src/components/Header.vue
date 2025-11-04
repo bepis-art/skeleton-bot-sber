@@ -44,7 +44,7 @@ import PwaButton from "@/components/PwaButton.vue";
 
 export default defineComponent({
     components: {PwaButton}
-})
+});
 </script>
 
 <style scoped>

@@ -1,11 +1,20 @@
-<script setup lang="ts">
+<script setup>
+import { useRouter } from 'vue-router';
+import Header from "@/components/Header.vue";
 
+const router = useRouter();
+
+const goToChat = () => {
+    router.push('/chat');
+};
 </script>
 
 <template>
+    <Header/>
+
     <div class="d-flex flex-column justify-content-center align-items-center h-75">
         <div class="d-flex flex-column gap-4 justify-content-between align-items-center h-auto">
-            <button class="btn btn-danger button-orange w-100 h-5">
+            <button @click="goToChat" class="btn btn-danger button-orange w-100 h-5">
                 Что делать при ЧС?
             </button>
 

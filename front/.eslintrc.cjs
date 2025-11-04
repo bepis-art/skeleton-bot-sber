@@ -25,9 +25,6 @@ module.exports = {
                 extraFileExtensions: [".vue"]
             },
             plugins: ["vue"],
-            extends: [
-                "plugin:vue/vue3-recommended" // или "plugin:vue/vue3-essential"
-            ],
             rules: {
                 curly: ["error", "all"],
                 semi: ["error", "always"],
@@ -80,7 +77,6 @@ module.exports = {
             parserOptions: {
                 ecmaVersion: "latest",
                 sourceType: "module",
-                project: "./tsconfig.json",
                 ecmaFeatures: {
                     jsx: true
                 }

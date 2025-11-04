@@ -3,17 +3,19 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "eslint .",
-    "build:theme": "node ./scripts/theme.js"
+    "build:theme": "node ./scripts/theme.js",
+    "dev": "vue-cli-service serve"
   },
   "dependencies": {
     "@vue/compiler-sfc": "^3.5.22",
     "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
     "bootstrap-vue-next": "^0.40.7",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
+    "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
@@ -21,9 +23,9 @@
     "@eslint/js": "^9.39.1",
     "@html-eslint/eslint-plugin": "^0.47.0",
     "@html-eslint/parser": "^0.47.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.3",
-    "@typescript-eslint/parser": "^8.46.3",
+    "@vitejs/plugin-vue": "^6.0.1",
     "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-pwa": "^5.0.9",
     "@vue/cli-service": "~5.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "^10.5.1",
