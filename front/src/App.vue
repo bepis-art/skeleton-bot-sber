@@ -37,4 +37,9 @@ export default {
 .nouser-select {
     user-select: none;
 }
+
+input:focus {
+    border-color: var(--color-orange) !important;
+    box-shadow: none !important;
+}
 </style>
