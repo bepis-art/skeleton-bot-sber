@@ -3,22 +3,18 @@
 
 ## Инструкция к запуску
 
-### Установка зависимостей
-
-```bash
-$ pip install -r requirements.txt
-```
-
 ### Сервер
 
 ```bash
 $ cd ./back
+$ pip install -r requirements.txt
 $ python -m uvicorn main:app --reload
 ```
 
 ### Бот
 
 ```bash
-$ cd ./back
+$ cd ./bot
+$ pip install -r requirements.txt
 $ python main.py
 ```

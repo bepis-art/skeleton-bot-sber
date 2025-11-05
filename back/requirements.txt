@@ -1,0 +1,5 @@
+python-dotenv
+gigachat
+fastapi
+pydantic
+uvicorn[standard]
