@@ -5,8 +5,8 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.enums import ChatAction
 
-from UserSession import UserSession
-from Consts import *
+from user_session import UserSession
+from consts import *
 
 import os
 import time

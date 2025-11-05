@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from GPTModule import GPTModule
+from gpt_module import GPTModule
 
 class TextInput(BaseModel):
     text: str

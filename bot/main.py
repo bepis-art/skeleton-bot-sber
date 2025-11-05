@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Dispatcher
 
-from HelperBot import HelperBot
+from helper_bot import HelperBot
 
 async def main():
     bot = HelperBot()

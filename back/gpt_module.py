@@ -3,7 +3,7 @@ import asyncio
 import re
 
 from dotenv import load_dotenv
-from Consts import *
+from consts import *
 
 from simple_rag import SimpleRAG as RAGManager
 from gigachat import GigaChat
