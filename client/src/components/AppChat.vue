@@ -91,13 +91,11 @@ const onSendMessage = async () => {
 
     // Отправляем сообщение через сервис
     responseLoading.value = true;
-    console.log("responseLoading: ", responseLoading);
     const responseText: IMessage | null = await chatService.sendMessage(userMessage);
     const text = responseText ? responseText.text : 'Ошибка получения ответа.';
     // Добавляем ответ системы в чат
     messages.value.push({text: text, sender: 'system'});
     responseLoading.value = false;
-    console.log("responseLoading: ", responseLoading);
 };
 </script>
 
