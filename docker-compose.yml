@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./back
+    container_name: ai-agent-back
+    ports:
+      - "8000:8000"
+    environment:
+      - GIGACHAT_CREDENTIALS=${GIGACHAT_CREDENTIALS}
+      - SCOPE=${SCOPE}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+    networks:
+      - app-network
+
+  frontend:
+    build: ./client
+    container_name: ai-agent-client
+    ports:
+      - "443:443"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
