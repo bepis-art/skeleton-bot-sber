@@ -1,12 +1,12 @@
 FROM node:latest as build-stage
-WORKDIR /front
+WORKDIR /client
 COPY package*.json ./
 RUN npm install
-COPY ../front .
+COPY ../client .
 RUN npm run build
 
 FROM nginx as production-stage
 COPY certs/ /certs/
-RUN mkdir /front
-COPY --from=build-stage /front/dist /front
+RUN mkdir /client
+COPY --from=build-stage /client/dist /client
 COPY nginx.conf /etc/nginx/nginx.conf
