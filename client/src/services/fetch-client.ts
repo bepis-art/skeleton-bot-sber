@@ -6,6 +6,7 @@ class FetchClient {
 
     async getHttpClient(): Promise<HttpClient> {
         if (!FetchClient.client) {
+            console.log("baseUrl из env: ", ConfigService.baseUrl);
             FetchClient.client = {
                 async request(url: string, options: RequestInit = {}) {
                     const fullUrl = `${ConfigService.baseUrl}${url}`;

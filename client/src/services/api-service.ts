@@ -1,6 +1,5 @@
 import fetchClient from "@/services/fetch-client.ts";
 import type {HttpClient} from "@/interfaces";
-import {ConfigService} from "@/services/config-service.ts";
 
 class ApiService {
     /**
@@ -21,6 +20,7 @@ class ApiService {
     async post(data?: any): Promise<any> {
         const client = await this.getHttpClient()
         const body = data ? JSON.stringify(data) : undefined;
+        console.log("client: ", client);
         return client.request('ask', {
             method: 'POST',
             headers: {
