@@ -4,8 +4,8 @@ services:
   backend:
     build: ./back
     container_name: ai-agent-back
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"  # только для внутренней сети
     environment:
       - GIGACHAT_CREDENTIALS=${GIGACHAT_CREDENTIALS}
       - SCOPE=${SCOPE}
@@ -16,13 +16,12 @@ services:
 
   frontend:
     build: ./client
-    container_name: ai-agent-client
+    container_name: ai-agent-frontend
     ports:
+      - "80:80"
       - "443:443"
-    environment:
-      - VITE_API_URL=${VITE_API_URL}
-    depends_on:
-      - backend
+    volumes:
+      - ./certs:/certs:ro  # монтируем сертификаты (только чтение)
     networks:
       - app-network
 

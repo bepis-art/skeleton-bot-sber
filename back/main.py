@@ -21,5 +21,6 @@ app.add_middleware(
 
 @app.post("/ask")
 async def ask(data: TextInput):
+    print("ASK ROUTE")
     response = await gpt.process(data.text, data.history)
     return {"text": response}

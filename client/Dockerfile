@@ -2,11 +2,11 @@ FROM node:latest as build-stage
 WORKDIR /client
 COPY package*.json ./
 RUN npm install
-COPY ../client .
-RUN npm run build
+COPY . .
+RUN npm run build-only
 
 FROM nginx as production-stage
-COPY certs/ /certs/
 RUN mkdir /client
 COPY --from=build-stage /client/dist /client
 COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80 443
