@@ -76,7 +76,7 @@ def generate_fallback_response(rag_results: list) -> str:
 
 class GPTModule:
     def __init__(self):
-        load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+        load_dotenv()
 
         credentials = os.getenv('GIGACHAT_CREDENTIALS')
         scope = os.getenv('SCOPE')
