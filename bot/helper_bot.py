@@ -15,7 +15,7 @@ import httpx
 
 class HelperBot:
     def __init__(self):
-        load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+        load_dotenv()
 
         server_url = os.getenv('SERVER_URL')
         token = os.getenv('TELEGRAM_TOKEN')
