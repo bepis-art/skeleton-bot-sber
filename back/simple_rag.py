@@ -1,5 +1,10 @@
+import logging
 import os
 from typing import List, Dict, Any
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class SimpleRAG:
     def __init__(self, documents_path: str = "documents"):
@@ -9,22 +14,22 @@ class SimpleRAG:
         
         # Ключевые слова для категорий
         self.category_keywords = {
-            '📝 БЫТОВЫЕ': ['квартира', 'дом', 'быт', 'газ', 'пожар', 'затопление', 'электричество', 'дым', 'огонь', 'запах', 'кухня', 'ванная'],
-            '🚁 БПЛА': ['дрон', 'бпла', 'беспилотник', 'воздушный', 'квадрокоптер', 'атака', 'обнаружить', 'небо', 'полет', 'город', 'воздух'],
-            '🌍 ПРИРОДНЫЕ': ['землетрясение', 'наводнение', 'ураган', 'природный', 'стихия', 'шторм', 'толчки', 'паводок', 'подтопление', 'ливень', 'буря'],
-            '⚡ ТЕХНОГЕННЫЕ': ['химический', 'радиация', 'радиационный', 'радиационная', 'авария', 'завод', 'производство', 'взрыв', 'промышленный', 'опасный', 'ядовитый', 'химическая']
+            'БЫТОВЫЕ': ['квартира', 'дом', 'быт', 'газ', 'пожар', 'затопление', 'электричество', 'дым', 'огонь', 'запах', 'кухня', 'ванная'],
+            'БПЛА': ['дрон', 'бпла', 'беспилотник', 'воздушный', 'квадрокоптер', 'атака', 'обнаружить', 'небо', 'полет', 'город', 'воздух'],
+            'ПРИРОДНЫЕ': ['землетрясение', 'наводнение', 'ураган', 'природный', 'стихия', 'шторм', 'толчки', 'паводок', 'подтопление', 'ливень', 'буря'],
+            'ТЕХНОГЕННЫЕ': ['химический', 'радиация', 'радиационный', 'радиационная', 'авария', 'завод', 'производство', 'взрыв', 'промышленный', 'опасный', 'ядовитый', 'химическая']
         }
         
-        print("✅ Simple RAG инициализирован")
+        logger.info("Simple RAG инициализирован")
     
     def load_all_documents(self):
         """Загрузка всех документов с разными стратегиями"""
         if not os.path.exists(self.documents_path):
-            print(f"❌ Папка {self.documents_path} не найдена")
+            logger.error(f"Папка {self.documents_path} не найдена")
             return False
         
         text_files = [f for f in os.listdir(self.documents_path) if f.endswith('.txt')]
-        print(f"📁 Найдено файлов: {text_files}")
+        logger.info(f"Найдено файлов: {len(text_files)}")
         
         total_chunks = 0
         for filename in text_files:
@@ -35,7 +40,7 @@ class SimpleRAG:
                 if not content:
                     continue
                 
-                print(f"✅ Файл {filename} прочитан, размер: {len(content)} символов")
+                logger.info(f"Файл {filename} прочитан, размер: {len(content)} символов")
                 
                 # Разные стратегии разбиения
                 chunks = self.split_content(content)
@@ -50,13 +55,13 @@ class SimpleRAG:
                     })
                     total_chunks += 1
                 
-                print(f"📄 Добавлено {len(chunks)} чанков из {filename}")
+                logger.info(f"Добавлено {len(chunks)} чанков из {filename}")
                 
             except Exception as e:
-                print(f"❌ Ошибка при загрузке {filename}: {e}")
+                logger.error(f"Ошибка при загрузке {filename}: {e}")
                 continue
         
-        print(f"📊 Всего загружено документов: {len(self.documents)}")
+        logger.info(f"Всего загружено документов: {len(self.documents)}")
         return True
     
     def read_file_safe(self, file_path: str) -> str:
@@ -72,10 +77,10 @@ class SimpleRAG:
             except UnicodeDecodeError:
                 continue
             except Exception as e:
-                print(f"⚠️ Ошибка с кодировкой {encoding}: {e}")
+                logger.error(f"Ошибка с кодировкой {encoding}: {e}")
                 continue
         
-        print(f"❌ Не удалось прочитать файл {file_path}")
+        logger.warning(f"Не удалось прочитать файл {file_path}")
         return ""
     
     def split_content(self, content: str) -> List[str]:
@@ -105,29 +110,29 @@ class SimpleRAG:
         """Определение категории по имени файла"""
         filename_lower = filename.lower()
         if 'domestic' in filename_lower:
-            return '📝 БЫТОВЫЕ'
+            return 'БЫТОВЫЕ'
         elif 'drone' in filename_lower:
-            return '🚁 БПЛА'
+            return 'БПЛА'
         elif 'natural' in filename_lower:
-            return '🌍 ПРИРОДНЫЕ'
+            return 'ПРИРОДНЫЕ'
         elif 'techno' in filename_lower:
-            return '⚡ ТЕХНОГЕННЫЕ'
+            return 'ТЕХНОГЕННЫЕ'
         else:
-            return '📄 ОБЩИЕ'
+            return 'ОБЩИЕ'
     
     def enhanced_search(self, query: str, max_results: int = 3) -> List[Dict[str, Any]]:
         """Улучшенный поиск с учетом категорий и заголовков"""
         if not self.documents:
-            print("⚠️ База документов пуста")
+            logger.warning("База документов пуста")
             return []
         
         # Определяем ожидаемую категорию по запросу
         expected_category = self.determine_expected_category(query)
-        print(f"🔍 Ожидаемая категория: {expected_category}")
+        logger.info(f"Ожидаемая категория: {expected_category}")
         
         # Создаем варианты запроса
         query_variants = self.generate_query_variants(query)
-        print(f"🔍 Варианты запроса: {query_variants[:5]}...")  # Показываем только первые 5
+        logger.info(f"Варианты запроса: {query_variants[:5]}...")  # Показываем только первые 5
         
         results = []
         
@@ -164,7 +169,7 @@ class SimpleRAG:
                 unique_results.append(result)
         
         final_results = unique_results[:max_results]
-        print(f"🔍 Найдено {len(final_results)} результатов для: '{query}'")
+        logger.info(f"Найдено {len(final_results)} результатов для: '{query}'")
         return final_results
     
     def determine_expected_category(self, query: str) -> str:
@@ -172,10 +177,10 @@ class SimpleRAG:
         query_lower = query.lower()
         
         category_scores = {
-            '📝 БЫТОВЫЕ': 0,
-            '🚁 БПЛА': 0,
-            '🌍 ПРИРОДНЫЕ': 0,
-            '⚡ ТЕХНОГЕННЫЕ': 0
+            'БЫТОВЫЕ': 0,
+            'БПЛА': 0,
+            'ПРИРОДНЫЕ': 0,
+            'ТЕХНОГЕННЫЕ': 0
         }
         
         # Подсчет ключевых слов для каждой категории
@@ -186,7 +191,7 @@ class SimpleRAG:
         
         # Определяем категорию с максимальным счетом
         max_score = 0
-        expected_category = '📄 ОБЩИЕ'
+        expected_category = 'ОБЩИЕ'
         
         for category, score in category_scores.items():
             if score > max_score:
@@ -288,51 +293,3 @@ class SimpleRAG:
             "total_documents": len(self.documents),
             "categories": categories
         }
-
-# Тестируем
-if __name__ == "__main__":
-    print("🧪 Тестируем УЛУЧШЕННЫЙ Simple RAG v2...")
-    
-    rag = SimpleRAG("documents")
-    
-    # Загружаем документы
-    success = rag.load_all_documents()
-    
-    if success and rag.documents:
-        # Тестируем поиск
-        test_queries = [
-            "пожар в квартире",
-            "атака дрона", 
-            "землетрясение",
-            "химическая авария",
-            "утечка газа",
-            "наводнение",
-            "бпла над городом",
-            "радиационная угроза"
-        ]
-        
-        print(f"\n🔍 ТЕСТИРУЕМ УЛУЧШЕННЫЙ ПОИСК v2:")
-        print("=" * 60)
-        
-        for query in test_queries:
-            print(f"\n🔍 Запрос: '{query}'")
-            results = rag.enhanced_search(query)
-            
-            if results:
-                for i, result in enumerate(results, 1):
-                    title_indicator = "📌 " if result['is_title'] else "   "
-                    print(f"   {i}. {title_indicator}{result['category']} [Score: {result['score']}]")
-                    print(f"      Файл: {result['source']}")
-                    preview = result['content'][:80] + "..." if len(result['content']) > 80 else result['content']
-                    print(f"      Текст: {preview}")
-            else:
-                print("   ❌ Не найдено")
-        
-        # Статистика
-        stats = rag.get_stats()
-        print(f"\n📊 Статистика:")
-        for category, count in stats["categories"].items():
-            print(f"   {category}: {count} документов")
-        print(f"   Всего: {stats['total_documents']} документов")
-    
-    print("\n✅ Улучшенный Simple RAG v2 готов!")

@@ -1,3 +1,4 @@
+import logging
 import os
 import asyncio
 import re
@@ -9,8 +10,10 @@ from simple_rag import SimpleRAG as RAGManager
 from gigachat import GigaChat
 
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def clean_markdown(text: str) -> str:
-    """Очищает текст от Markdown разметки"""
     if not text:
         return text
 
@@ -30,7 +33,6 @@ def clean_markdown(text: str) -> str:
 
 
 def generate_fallback_response(rag_results: list) -> str:
-    """Резервный ответ если GigaChat не работает"""
     if not rag_results:
         return NO_ANSWER
 
@@ -47,7 +49,6 @@ def generate_fallback_response(rag_results: list) -> str:
 
         response += f"🔹 {category}:\n"
 
-        # Извлекаем ключевые шаги
         lines = content.split('\n')
         steps = []
 
@@ -81,8 +82,10 @@ class GPTModule:
         credentials = os.getenv('GIGACHAT_CREDENTIALS')
         scope = os.getenv('SCOPE')
 
-        if not credentials or not scope:
-            raise Exception('Не установлены переменные')
+        if not credentials:
+            raise Exception('Не установлена переменная GIGACHAT_CREDENTIALS')
+        if not scope:
+            raise Exception('Не установлена переменная SCOPE')
 
         self.credentials = credentials
         self.scope = scope
@@ -94,7 +97,7 @@ class GPTModule:
         try:
             relevant_instructions = self.rag_manager.search_emergency_instructions(text, max_results=3)
         except Exception as e:
-            print(f"⚠️ Ошибка поиска в RAG: {e}")
+            logger.info(f"Ошибка поиска в RAG: {e}")
 
         response = await self.generate_response_with_gigachat(
             text,
@@ -103,13 +106,10 @@ class GPTModule:
         )
         return clean_markdown(response)
 
-
     def load_instructions(self):
         self.rag_manager.load_all_documents()
 
     def generate_gigachat_response_sync(self, user_query: str, rag_results: list, conversation_history: str = "") -> str:
-        """Синхронная функция для работы с GigaChat с учетом истории"""
-        # Формируем контекст для GigaChat
         context = "БАЗА ЗНАНИЙ ПО ЧС:\n\n"
 
         if rag_results:
@@ -119,15 +119,16 @@ class GPTModule:
                 category = result["category"]
                 score = result["score"]
 
-                # Ограничиваем длину
                 if len(content) > 400:
                     content = content[:400] + "..."
 
                 context += f"ИНСТРУКЦИЯ {i} [{category}] (релевантность: {score:.3f}):\n{content}\n\n"
+
+            logger.info(f"Найдено {len(rag_results)} релевантных инструкций")
         else:
             context += "В базе знаний не найдено релевантных инструкций. Используй общие принципы безопасности.\n\n"
+            logger.warning(f"Не найдены релевантные инструкции")
 
-        # Формируем полный промпт с историей
         full_prompt = f"{SYSTEM_PROMPT}\n\n"
 
         if conversation_history:
@@ -136,26 +137,23 @@ class GPTModule:
         full_prompt += f"{context}\n\nТЕКУЩИЙ ЗАПРОС ПОЛЬЗОВАТЕЛЯ: {user_query}\n\nОТВЕТ СПАСАТЕЛЯ:"
 
         try:
-            # СОЗДАЕМ НОВЫЙ КЛИЕНТ ДЛЯ КАЖДОГО ЗАПРОСА
             gigachat_client = GigaChat(
                 credentials=self.credentials,
                 scope=self.scope,
                 verify_ssl_certs=False
             )
 
-            # Используем контекстный менеджер для этого клиента
             with gigachat_client:
                 response = gigachat_client.chat(full_prompt)
 
             return response.choices[0].message.content
 
         except Exception as e:
+            logger.error(f"Ошибка выполнения запроса к Gigachat: {e}")
             return generate_fallback_response(rag_results)
 
     async def generate_response_with_gigachat(self, user_query: str, rag_results: list,
                                               conversation_history: str = "") -> str:
-        """Асинхронная обертка для GigaChat"""
-        # Запускаем в thread pool executor чтобы избежать блокировки
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             None,

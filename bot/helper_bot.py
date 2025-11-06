@@ -1,3 +1,5 @@
+import logging
+
 from dotenv import load_dotenv
 
 from aiogram import Bot, Router
@@ -13,14 +15,21 @@ import time
 import asyncio
 import httpx
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class HelperBot:
     def __init__(self):
         load_dotenv()
 
         server_url = os.getenv('SERVER_URL')
         token = os.getenv('TELEGRAM_TOKEN')
-        if not server_url or not token:
-            raise Exception('Не установлены переменные')
+
+        if not server_url:
+            raise Exception('Не установлена переменная SERVER_URL')
+        if not token:
+            raise Exception('Не установлена переменная TOKEN')
 
         self.server_url = server_url
         self.bot = Bot(token=token)
@@ -37,7 +46,6 @@ class HelperBot:
         self.router.message()(self.handle_message)
 
     async def keep_typing(self, chat_id: int):
-        """Поддерживает статус 'печатает...'"""
         try:
             while True:
                 await self.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
@@ -45,27 +53,24 @@ class HelperBot:
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            print(f"Ошибка в keep_typing: {e}")
+            logger.warning(f"Ошибка в keep_typing: {e}")
 
     def get_user_session(self, user_id: int) -> UserSession:
-        """Возвращает сессию пользователя, создает новую если нет"""
         if user_id not in self.user_sessions:
             self.user_sessions[user_id] = UserSession(user_id)
         return self.user_sessions[user_id]
 
     async def start_command(self, message: Message):
-        """Обработчик команды /start"""
         await asyncio.sleep(0.3)
         await self.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
         user_session = self.get_user_session(message.from_user.id)
-        user_session.clear_history()  # Очищаем историю при старте
+        user_session.clear_history()
 
         user_session.add_message("assistant", WELCOME_TEXT)
         await message.reply(WELCOME_TEXT)
 
     async def help_command(self, message: Message):
-        """Обработчик команды /help"""
         await asyncio.sleep(0.3)
         await self.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
@@ -74,13 +79,11 @@ class HelperBot:
         await message.reply(HELP_TEXT)
 
     async def categories_command(self, message: Message):
-        """Показать доступные категории инструкций"""
         user_session = self.get_user_session(message.from_user.id)
         user_session.add_message("assistant", CATEGORIES)
         await message.reply(CATEGORIES)
 
     async def history_command(self, message: Message):
-        """Показать историю диалога"""
         user_session = self.get_user_session(message.from_user.id)
 
         if not user_session.history:
@@ -96,7 +99,6 @@ class HelperBot:
         await message.reply(response)
 
     async def clear_command(self, message: Message):
-        """Очистка истории диалога"""
         user_session = self.get_user_session(message.from_user.id)
         user_session.clear_history()
 
@@ -108,19 +110,18 @@ class HelperBot:
         user_id = message.from_user.id
         user_text = message.text
 
+        logger.info(f"{user_id}: {user_text}")
+
         try:
             await asyncio.sleep(0.5)
             await self.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
             typing_task = asyncio.create_task(self.keep_typing(message.chat.id))
 
-            # Получаем сессию пользователя
             user_session = self.get_user_session(user_id)
 
-            # Добавляем сообщение пользователя в историю
             user_session.add_message("user", user_text)
 
-            # Получаем историю диалога для контекста
             conversation_history = user_session.get_conversation_history()
 
             async with httpx.AsyncClient() as client:
@@ -152,4 +153,4 @@ class HelperBot:
             user_session = self.get_user_session(user_id)
             user_session.add_message("assistant", error_message)
             await message.reply(error_message)
-            print(f"❌ Ошибка у пользователя {user_id}: {e}")
+            logger.error(f"Ошибка у пользователя {user_id}: {e}")
