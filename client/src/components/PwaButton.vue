@@ -10,7 +10,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 const deferredPrompt = ref(null);

@@ -15,10 +15,17 @@ export default {
 </script>
 
 <style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 #app {
+    display: flex;
+    flex-direction: column;
     height: 100vh;
     width: 100vw;
-    overflow: hidden; /* опционально, если не хотите скролл */
 }
 
 .text-orange {

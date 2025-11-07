@@ -53,8 +53,9 @@ export default {
 }
 
 .info-icon {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
+    max-width: 100%;
 }
 
 .icon-background {

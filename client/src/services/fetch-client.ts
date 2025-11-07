@@ -1,4 +1,3 @@
-import { ConfigService } from "./config-service.ts";
 import type {HttpClient} from "@/interfaces";
 
 class FetchClient {

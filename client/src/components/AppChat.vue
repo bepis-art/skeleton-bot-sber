@@ -3,7 +3,6 @@ import {useRouter} from 'vue-router';
 import {ref, onMounted} from 'vue';
 import {ChatService} from "@/services/chat-service";
 import type {IMessage} from "@/interfaces/front";
-import type {IObject} from "@/interfaces";
 
 const router = useRouter();
 const chatService = new ChatService(); // Создаём экземпляр сервиса
