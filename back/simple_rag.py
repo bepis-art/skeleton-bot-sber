@@ -170,6 +170,12 @@ class SimpleRAG:
         
         final_results = unique_results[:max_results]
         logger.info(f"Найдено {len(final_results)} результатов для: '{query}'")
+
+        logger.info('Вывод инструкций >>>')
+        for instruction in final_results:
+            logger.info(instruction)
+        logger.info('<<<')
+
         return final_results
     
     def determine_expected_category(self, query: str) -> str:

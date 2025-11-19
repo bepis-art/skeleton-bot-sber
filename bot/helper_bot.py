@@ -67,20 +67,15 @@ class HelperBot:
         user_session = self.get_user_session(message.from_user.id)
         user_session.clear_history()
 
-        user_session.add_message("assistant", WELCOME_TEXT)
         await message.reply(WELCOME_TEXT)
 
     async def help_command(self, message: Message):
         await asyncio.sleep(0.3)
         await self.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
-        user_session = self.get_user_session(message.from_user.id)
-        user_session.add_message("assistant", HELP_TEXT)
         await message.reply(HELP_TEXT)
 
     async def categories_command(self, message: Message):
-        user_session = self.get_user_session(message.from_user.id)
-        user_session.add_message("assistant", CATEGORIES)
         await message.reply(CATEGORIES)
 
     async def history_command(self, message: Message):
@@ -95,7 +90,6 @@ class HelperBot:
                 time_str = time.strftime("%H:%M:%S", time.localtime(msg["timestamp"]))
                 response += f"{i}. {role} ({time_str}):\n{msg['content'][:100]}{'...' if len(msg['content']) > 100 else ''}\n\n"
 
-        user_session.add_message("assistant", response)
         await message.reply(response)
 
     async def clear_command(self, message: Message):
@@ -103,7 +97,6 @@ class HelperBot:
         user_session.clear_history()
 
         response = CLEAR_HISTORY
-        user_session.add_message("assistant", response)
         await message.reply(response)
 
     async def handle_message(self, message: Message):
@@ -120,8 +113,6 @@ class HelperBot:
 
             user_session = self.get_user_session(user_id)
 
-            user_session.add_message("user", user_text)
-
             conversation_history = user_session.get_conversation_history()
 
             async with httpx.AsyncClient() as client:
@@ -134,6 +125,7 @@ class HelperBot:
                 data = response.json()
                 result = data["text"]
 
+                user_session.add_message("user", user_text)
                 user_session.add_message("assistant", result)
 
                 typing_task.cancel()
@@ -150,7 +142,5 @@ class HelperBot:
 
             error_message = ERROR_MESSAGE
 
-            user_session = self.get_user_session(user_id)
-            user_session.add_message("assistant", error_message)
             await message.reply(error_message)
             logger.error(f"Ошибка у пользователя {user_id}: {e}")

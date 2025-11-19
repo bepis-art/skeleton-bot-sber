@@ -93,6 +93,7 @@ class GPTModule:
         self.load_instructions()
 
     async def process(self, text, history):
+        text += '. Что делать?'
         relevant_instructions = []
         try:
             relevant_instructions = self.rag_manager.search_emergency_instructions(text, max_results=3)
@@ -132,9 +133,9 @@ class GPTModule:
         full_prompt = f"{SYSTEM_PROMPT}\n\n"
 
         if conversation_history:
-            full_prompt += f"{conversation_history}\n\n"
+            full_prompt += f"При формировании ответа учти предыдущую историю запросов: {conversation_history}\n\n"
 
-        full_prompt += f"{context}\n\nТЕКУЩИЙ ЗАПРОС ПОЛЬЗОВАТЕЛЯ: {user_query}\n\nОТВЕТ СПАСАТЕЛЯ:"
+        full_prompt += f"{context}\n\nТЕКУЩИЙ ЗАПРОС ПОЛЬЗОВАТЕЛЯ: {user_query}"
 
         try:
             gigachat_client = GigaChat(
@@ -143,6 +144,7 @@ class GPTModule:
                 verify_ssl_certs=False
             )
 
+            logger.info(f"Полный запрос:\n{full_prompt}")
             with gigachat_client:
                 response = gigachat_client.chat(full_prompt)
 
