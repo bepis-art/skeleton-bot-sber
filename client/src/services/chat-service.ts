@@ -17,6 +17,7 @@ export class ChatService {
     private mapToMessage(data: ApiMessage): IMessage {
         return {
             text: data.text.replace(/\n/g, '<br/>'),
+            sender: 'system'
         };
     }
 }

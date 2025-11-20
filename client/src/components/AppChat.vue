@@ -1,27 +1,36 @@
 <script setup lang="ts">
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, onUnmounted} from 'vue';
 import {ChatService} from "@/services/chat-service";
 import type {IMessage} from "@/interfaces/front";
+import type {IObject} from "@/interfaces";
 
-const chatService = new ChatService(); // Создаём экземпляр сервиса
+const chatService = new ChatService();
 
 // Состояние голосового ввода
 const isListening = ref(false);
 const userInput = ref('');
-const recognition = ref(null);
+const recognition = ref<IObject | null>(null);
 
 const responseLoading = ref(false);
 
 // Состояние сообщений чата
-const messages = ref([
+const messages = ref<IMessage[]>([
     {
         text: 'Опишите ситуацию. Я помогу.',
         sender: 'system'
     }
 ]);
 
-// Инициализация SpeechRecognition при монтировании компонента
-onMounted(() => {
+// Инициализация IndexedDB
+const DB_NAME = 'ChatDB';
+const STORE_NAME = 'messages';
+const DB_VERSION = 1;
+
+let db: IDBDatabase | null = null;
+
+// Открываем соединение с базой данных
+onMounted(async () => {
+    // Инициализация SpeechRecognition
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition.value = new SpeechRecognition();
@@ -29,13 +38,13 @@ onMounted(() => {
         recognition.value.interimResults = false;
         recognition.value.lang = 'ru-RU';
 
-        recognition.value.onresult = (event) => {
+        recognition.value.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
             userInput.value = transcript.trim();
             stopListening();
         };
 
-        recognition.value.onerror = (event) => {
+        recognition.value.onerror = (event: any) => {
             console.error('Ошибка распознавания:', event.error);
             stopListening();
         };
@@ -48,7 +57,134 @@ onMounted(() => {
     } else {
         console.warn('SpeechRecognition не поддерживается в этом браузере.');
     }
+
+    // Инициализация IndexedDB
+    await initDB();
+    // Загружаем сохранённые сообщения
+    const savedMessages = await loadMessages();
+    if (savedMessages.length > 0) {
+        messages.value = savedMessages;
+    }
+
+    // Обработчики событий для сохранения данных
+    window.addEventListener('beforeunload', saveMessages);
+    window.addEventListener('pagehide', saveMessages);
 });
+
+onUnmounted(() => {
+    // Убираем обработчики при размонтировании
+    window.removeEventListener('beforeunload', saveMessages);
+    window.removeEventListener('pagehide', saveMessages);
+});
+
+// Функция инициализации базы данных
+async function initDB(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = () => {
+            console.error('Ошибка открытия IndexedDB:', request.error);
+            reject(request.error);
+        };
+
+        request.onsuccess = () => {
+            db = request.result;
+            console.log('IndexedDB успешно открыта');
+            resolve();
+        };
+
+        request.onupgradeneeded = (event) => {
+            const dbInstance = (event.target as IDBOpenDBRequest).result;
+            if (!dbInstance.objectStoreNames.contains(STORE_NAME)) {
+                const store = dbInstance.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                store.createIndex('timestamp', 'timestamp', { unique: false });
+            }
+        };
+    });
+}
+
+// Функция очистки всех сообщений
+async function clearMessages(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            reject('База данных не инициализирована');
+            return;
+        }
+
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.clear();
+
+        request.onsuccess = () => {
+            console.log('Сообщения успешно очищены');
+            resolve();
+        };
+
+        request.onerror = () => {
+            console.error('Ошибка очистки сообщений:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+// Функция сохранения сообщений
+async function saveMessages(): Promise<void> {
+    if (!db) {
+        console.error('База данных не инициализирована');
+        return;
+    }
+
+    try {
+        // Очищаем старые сообщения перед сохранением
+        await clearMessages();
+
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+
+        // Добавляем текущие сообщения
+        for (const message of messages.value) {
+            store.add({ ...message, timestamp: Date.now() });
+        }
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error);
+        });
+
+        console.log('Сообщения успешно сохранены');
+    } catch (error) {
+        console.error('Ошибка сохранения сообщений:', error);
+    }
+}
+
+// Функция загрузки сообщений
+async function loadMessages(): Promise<IMessage[]> {
+    if (!db) {
+        return [];
+    }
+
+    try {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => {
+                const result = request.result;
+                console.log('Сообщения успешно загружены');
+                resolve(result.map((item: IMessage) => ({ text: item.text, sender: item.sender })));
+            };
+
+            request.onerror = () => {
+                console.error('Ошибка загрузки сообщений:', request.error);
+                reject(request.error);
+            };
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки сообщений:', error);
+        return [];
+    }
+}
 
 // Функции управления голосовым вводом
 const startListening = () => {
@@ -83,15 +219,21 @@ const onSendMessage = async () => {
     const userMessage = userInput.value.trim();
     // Добавляем сообщение пользователя в чат
     messages.value.push({text: userMessage, sender: 'user'});
+    // Сохраняем сообщения в IndexedDB
+    await saveMessages();
+
     // Очищаем поле ввода
     userInput.value = '';
 
     // Отправляем сообщение через сервис
     responseLoading.value = true;
-    const responseText: IMessage | null = await chatService.sendMessage(userMessage);
-    const text = responseText ? responseText.text : 'Ошибка получения ответа.';
+    const response: IMessage | null = await chatService.sendMessage(userMessage);
+    const text = response ? response.text : 'Ошибка получения ответа.';
+    const sender = response ? response.sender : 'system';
     // Добавляем ответ системы в чат
-    messages.value.push({text: text, sender: 'system'});
+    messages.value.push({text: text, sender: sender});
+    // Сохраняем сообщения в IndexedDB
+    await saveMessages();
     responseLoading.value = false;
 };
 </script>
@@ -189,7 +331,6 @@ const onSendMessage = async () => {
 }
 
 .chat-wrapper {
-    max-width: 800px;
     width: 100%;
     display: flex;
     flex-direction: column;
