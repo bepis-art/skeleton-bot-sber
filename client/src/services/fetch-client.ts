@@ -8,7 +8,7 @@ class FetchClient {
             console.error("baseUrl из env: ", import.meta);
             FetchClient.client = {
                 async request(url: string, options: RequestInit = {}) {
-                    const fullUrl = `/api/${url}`;
+                    const fullUrl = `${url ?? ''}`;
                     return fetch(fullUrl, {
                         ...options
                     });

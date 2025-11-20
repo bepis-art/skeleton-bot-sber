@@ -17,11 +17,10 @@ class ApiService {
      * Отправить POST запрос
      * Ошибки обрабатывать в сервисах
      */
-    async post(data?: any): Promise<any> {
+    async post(link: string, data?: any): Promise<any> {
         const client = await this.getHttpClient()
         const body = data ? JSON.stringify(data) : undefined;
-        console.log("client: ", client);
-        return client.request('ask', {
+        return client.request(link, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

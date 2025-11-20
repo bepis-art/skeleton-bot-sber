@@ -1,10 +1,12 @@
 import apiService from "@/services/api-service.ts";
 import type {ApiMessage} from "@/interfaces/api";
 import type {IMessage} from "@/interfaces/front";
+import {ConfigService} from "@/services/config-service.ts";
 export class ChatService {
     async sendMessage(msg: string): Promise<IMessage | null> {
         // fixme без хардока
-        return apiService.post({ text: msg })
+        const link: string = ConfigService.baseUrl + 'ask'
+        return apiService.post(link, { text: msg })
             .then((response: ApiMessage) => this.mapToMessage(response))
             .catch((error: Error) => {
                 console.log(error);

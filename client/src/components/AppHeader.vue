@@ -1,6 +1,6 @@
 <template>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid d-flex justify-content-center align-items-center">
+    <nav class="navbar header position-sticky navbar-expand-lg">
+        <div v-if="mode === 'main'" class="container-fluid d-flex justify-content-center align-items-center">
             <div class="d-flex gap-1 flex-column justify-content-center align-items-center nouser-select">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -35,19 +35,38 @@
                 <PwaButton/>
             </div>
         </div>
+        <div v-if="mode === 'chat'" class="d-flex align-items-center p-3">
+            <button class="btn btn-link p-0 me-2" @click="goBackToMain" aria-label="Назад">
+                <i class="bi bi-arrow-left fs-4 text-orange"></i>
+            </button>
+            <div>
+                <h5 class="mb-0 nouser-select">Что делать при ЧС?</h5>
+                <small class="text-muted nouser-select">ИИ-агент на связи</small>
+            </div>
+        </div>
     </nav>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
 import PwaButton from "@/components/PwaButton.vue";
 
-export default {
-    name: 'AppHeader',
-    components: {PwaButton}
+defineProps<{
+    mode: 'main' | 'chat'
+}>();
+
+const router = useRouter();
+
+// Метод для возврата в главное меню
+const goBackToMain = () => {
+    router.push('/');
 };
 </script>
 
 <style scoped>
+.header {
+    z-index: 1000;
+}
 .navbar {
     border-bottom: 1px solid var(--bs-gray-200);
 }

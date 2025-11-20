@@ -1,27 +1,21 @@
 <script lang="ts">
 import { useRouter } from 'vue-router';
-import AppHeader from "@/components/AppHeader.vue";
 export default {
     name: 'AppMain',
-    components: {
-        AppHeader
-    },
     setup() {
         const router = useRouter();
 
-        const goToChat = () => {
+        const onOpenChat = () => {
             router.push('/chat');
         };
         return {
-            goToChat,
+            goToChat: onOpenChat,
         };
     }
 };
 </script>
 
 <template>
-    <AppHeader/>
-
     <div class="container-fluid flex-grow-1 d-flex flex-column justify-content-center align-items-center px-3">
         <div class="d-flex flex-column gap-3 w-100 max-width-content">
             <button
