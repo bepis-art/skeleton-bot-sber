@@ -3,6 +3,7 @@ import {ref, onMounted, onUnmounted} from 'vue';
 import {ChatService} from "@/services/chat-service";
 import type {IMessage} from "@/interfaces/front";
 import type {IObject} from "@/interfaces";
+import {ESender} from "@/enums";
 
 const chatService = new ChatService();
 
@@ -17,7 +18,7 @@ const responseLoading = ref(false);
 const messages = ref<IMessage[]>([
     {
         text: 'Опишите ситуацию. Я помогу.',
-        sender: 'system'
+        sender: ESender.SYSTEM
     }
 ]);
 
@@ -89,7 +90,6 @@ async function initDB(): Promise<void> {
 
         request.onsuccess = () => {
             db = request.result;
-            console.log('IndexedDB успешно открыта');
             resolve();
         };
 
@@ -171,7 +171,6 @@ async function loadMessages(): Promise<IMessage[]> {
         return new Promise((resolve, reject) => {
             request.onsuccess = () => {
                 const result = request.result;
-                console.log('Сообщения успешно загружены');
                 resolve(result.map((item: IMessage) => ({ text: item.text, sender: item.sender })));
             };
 
@@ -217,19 +216,19 @@ const onSendMessage = async () => {
     }
 
     const userMessage = userInput.value.trim();
-    // Добавляем сообщение пользователя в чат
-    messages.value.push({text: userMessage, sender: 'user'});
-    // Сохраняем сообщения в IndexedDB
-    await saveMessages();
 
     // Очищаем поле ввода
     userInput.value = '';
 
     // Отправляем сообщение через сервис
     responseLoading.value = true;
-    const response: IMessage | null = await chatService.sendMessage(userMessage);
+    const response: IMessage | null = await chatService.sendMessage(userMessage, messages.value);
+    // Добавляем сообщение пользователя в чат
+    messages.value.push({text: userMessage, sender: ESender.USER});
+    // Сохраняем сообщения в IndexedDB
+    await saveMessages();
     const text = response ? response.text : 'Ошибка получения ответа.';
-    const sender = response ? response.sender : 'system';
+    const sender = response ? response.sender : ESender.SYSTEM;
     // Добавляем ответ системы в чат
     messages.value.push({text: text, sender: sender});
     // Сохраняем сообщения в IndexedDB
@@ -247,8 +246,8 @@ const onSendMessage = async () => {
                     :key="index"
                     class="message-bubble mb-2"
                     :class="{
-                        'user-message': msg.sender === 'user',
-                        'system-message': msg.sender === 'system'
+                        'user-message': msg.sender === ESender.USER,
+                        'system-message': msg.sender === ESender.SYSTEM
                     }"
                     role="alert"
                     v-html="msg.text"
