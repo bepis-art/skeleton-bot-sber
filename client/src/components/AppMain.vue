@@ -17,7 +17,7 @@ export default {
 
 <template>
     <div class="container-fluid flex-grow-1 d-flex flex-column justify-content-center align-items-center px-3">
-        <div class="d-flex flex-column gap-3 w-100 max-width-content">
+        <div class="d-flex flex-column gap-3 w-100 max-width-content input-group-lg">
             <button
                 @click="goToChat"
                 class="btn btn-danger button-orange py-2"

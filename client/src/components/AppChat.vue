@@ -239,7 +239,7 @@ const onSendMessage = async () => {
 
 <template>
     <div class="d-flex flex-column vh-100 overflow-hidden">
-        <div class="chat-wrapper d-flex justify-content-between flex-column flex-grow-1 w-75 mx-auto h-100">
+        <div class="chat-wrapper d-flex justify-content-between flex-column flex-grow-1 mx-auto h-100">
             <div class="messages-container custom-scroll flex-grow-1 overflow-auto p-3 bg-white d-flex flex-column h-75">
                 <div
                     v-for="(msg, index) in messages"
@@ -264,7 +264,7 @@ const onSendMessage = async () => {
             </div>
 
             <div class="input-panel rounded-top rounded-bottom d-flex p-3 border-top border-end border-start border-bottom bg-light position-sticky bottom-0">
-                <div class="flex-grow-1 me-2 position-relative">
+                <div class="flex-grow-1 me-2 position-relative input-group-lg">
                     <input
                         v-model="userInput"
                         type="text"
@@ -277,7 +277,7 @@ const onSendMessage = async () => {
                 </div>
 
                 <button
-                    class="btn button-orange d-flex align-items-center justify-content-center"
+                    class="btn btn-lg button-orange d-flex align-items-center justify-content-center"
                     @click="onSendMessage()"
                     :disabled="isListening || responseLoading"
                 >
@@ -286,7 +286,7 @@ const onSendMessage = async () => {
 
                 <button
                     :class="[
-                        'btn',
+                        'btn btn-lg',
                         'd-flex',
                         'align-items-center',
                         'justify-content-center',
@@ -330,9 +330,20 @@ const onSendMessage = async () => {
 }
 
 .chat-wrapper {
-    width: 100%;
+    width: 75%;
+    max-width: 100%;
+    margin: 0 auto;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+    .chat-wrapper {
+        width: 100%;
+    }
 }
 
 .messages-container {
