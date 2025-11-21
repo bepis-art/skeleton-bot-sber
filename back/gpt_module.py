@@ -93,7 +93,7 @@ class GPTModule:
         self.load_instructions()
 
     async def process(self, text, history):
-        text += '. Что делать?'
+        # text += '. Что делать?'
         relevant_instructions = []
         try:
             relevant_instructions = self.rag_manager.search_emergency_instructions(text, max_results=3)
