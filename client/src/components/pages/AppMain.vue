@@ -1,15 +1,23 @@
 <script lang="ts">
 import { useRouter } from 'vue-router';
+import BaseButton from "@/components/BaseButton.vue";
 export default {
     name: 'AppMain',
+    components: {BaseButton},
     setup() {
         const router = useRouter();
 
         const onOpenChat = () => {
             router.push('/chat');
         };
+
+        const onOpenAdmin = () => {
+            router.push('/admin');
+        };
+
         return {
             goToChat: onOpenChat,
+            goToAdmin: onOpenAdmin,
         };
     }
 };
@@ -18,16 +26,20 @@ export default {
 <template>
     <div class="container-fluid flex-grow-1 d-flex flex-column justify-content-center align-items-center px-3">
         <div class="d-flex flex-column gap-3 w-100 max-width-content input-group-lg">
-            <button
-                @click="goToChat"
-                class="btn btn-danger button-orange py-2"
-            >
-                Что делать при ЧС?
-            </button>
 
-            <button class="btn btn-danger button-orange py-2">
-                Сообщить о проблеме
-            </button>
+            <BaseButton
+                :label="'Что делать при ЧС?'"
+                :on-click="goToChat"
+            />
+
+            <BaseButton
+                :label="'Сообщить о проблеме'"
+            />
+
+            <BaseButton
+                :label="'Админ панель'"
+                :on-click="goToAdmin"
+            />
 
             <span class="text-secondary nouser-select text-center">
                 Нажмите "Что делать при ЧС?" для получения помощи от ИИ-агента

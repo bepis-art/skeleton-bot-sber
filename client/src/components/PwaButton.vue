@@ -1,17 +1,16 @@
 <template>
     <div>
-        <button
-            v-if="showInstallPrompt"
-            @click="installApp"
-            class="btn btn-danger button-orange"
-        >
-            📱 Установить приложение
-        </button>
+        <BaseButton
+            :label="'📱 Установить приложение'"
+            :on-click="installApp"
+            :is-visible="showInstallPrompt"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import BaseButton from "@/components/BaseButton.vue";
 
 const deferredPrompt = ref(null);
 const showInstallPrompt = ref(false);

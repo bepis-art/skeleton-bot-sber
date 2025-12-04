@@ -5,10 +5,11 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 import AppFooter from "@/components/AppFooter.vue";
 import AppHeader from "@/components/AppHeader.vue";
+import {ERouteMode} from "@/enums";
 
 export default {
     name: 'App',
@@ -18,16 +19,23 @@ export default {
     },
     setup() {
         const route = useRoute();
-        const currentMode = ref<'main' | 'chat'>('main');
+        const currentMode = ref<ERouteMode>(ERouteMode.MAIN);
 
         // Следим за изменением маршрута
         watch(
             () => route.path,
             (newPath) => {
                 if (newPath === '/chat') {
-                    currentMode.value = 'chat';
-                } else {
-                    currentMode.value = 'main';
+                    currentMode.value = ERouteMode.CHAT;
+                }
+                if (newPath === '/main') {
+                    currentMode.value = ERouteMode.MAIN;
+                }
+                if (newPath === '/admin') {
+                    currentMode.value = ERouteMode.ADMIN;
+                }
+                if (newPath === '/') {
+                    currentMode.value = ERouteMode.MAIN;
                 }
             },
             { immediate: true }

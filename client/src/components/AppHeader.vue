@@ -1,6 +1,6 @@
 <template>
     <nav class="navbar header position-sticky navbar-expand-lg">
-        <div v-if="mode === 'main'" class="container-fluid d-flex justify-content-center align-items-center">
+        <div v-if="mode === ERouteMode.MAIN" class="container-fluid d-flex justify-content-center align-items-center input-group-lg">
             <div class="d-flex gap-1 flex-column justify-content-center align-items-center nouser-select">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +35,7 @@
                 <PwaButton/>
             </div>
         </div>
-        <div v-if="mode === 'chat'" class="d-flex align-items-center p-3">
+        <div v-if="mode === ERouteMode.CHAT" class="d-flex align-items-center p-3 input-group-lg">
             <button class="btn btn-link p-0 me-2" @click="goBackToMain" aria-label="Назад">
                 <i class="bi bi-arrow-left fs-4 text-orange"></i>
             </button>
@@ -44,15 +44,24 @@
                 <small class="text-muted nouser-select">ИИ-агент на связи</small>
             </div>
         </div>
+        <div v-if="mode === ERouteMode.ADMIN" class="d-flex align-items-center p-3 input-group-lg">
+            <button class="btn btn-link p-0 me-2" @click="goBackToMain" aria-label="Назад">
+                <i class="bi bi-arrow-left fs-4 text-orange"></i>
+            </button>
+            <div>
+                <h5 class="mb-0 nouser-select">Админ-панель: Управление файлами</h5>
+            </div>
+        </div>
     </nav>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
 import PwaButton from "@/components/PwaButton.vue";
+import {ERouteMode} from "@/enums";
 
 defineProps<{
-    mode: 'main' | 'chat'
+    mode: ERouteMode
 }>();
 
 const router = useRouter();

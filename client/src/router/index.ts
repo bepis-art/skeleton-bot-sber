@@ -1,13 +1,14 @@
 import {createRouter, createWebHistory} from 'vue-router';
 
-// Импортируем компоненты страниц
-import AppMain from "@/components/AppMain.vue";
-import AppChat from "@/components/AppChat.vue";
+import AppMain from "@/components/pages/AppMain.vue";
+import AppChat from "@/components/pages/AppChat.vue";
+import AdminPanel from "@/components/pages/AdminPanel.vue";
 
 const routes = [
   { path: '/', component: AppMain },
   { path: '/main', component: AppMain },
   { path: '/chat', component: AppChat },
+  { path: '/admin', component: AdminPanel },
   { path: '/:pathMatch(.*)*', redirect: '/main' }
 ];
 
