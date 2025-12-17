@@ -4,9 +4,9 @@ import asyncio
 import re
 
 from dotenv import load_dotenv
-from consts import *
+from app.config.consts import *
 
-from simple_rag import SimpleRAG as RAGManager
+from app.services.rag_service import RagService
 from gigachat import GigaChat
 
 
@@ -75,8 +75,8 @@ def generate_fallback_response(rag_results: list) -> str:
     return response
 
 
-class GPTModule:
-    def __init__(self):
+class GptService:
+    def __init__(self, rag_service: RagService):
         load_dotenv()
 
         credentials = os.getenv('GIGACHAT_CREDENTIALS')
@@ -89,11 +89,10 @@ class GPTModule:
 
         self.credentials = credentials
         self.scope = scope
-        self.rag_manager = RAGManager(documents_path="documents")
+        self.rag_manager = rag_service
         self.load_instructions()
 
     async def process(self, text, history):
-        # text += '. Что делать?'
         relevant_instructions = []
         try:
             relevant_instructions = self.rag_manager.search_emergency_instructions(text, max_results=3)

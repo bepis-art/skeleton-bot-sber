@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class SimpleRAG:
-    def __init__(self, documents_path: str = "documents"):
-        self.documents_path = documents_path
+class RagService:
+    def __init__(self):
+        self.documents_path = "../../templates"
         self.documents: List[str] = []
         self.document_metadata: List[Dict[str, Any]] = []
         self.vectorizer: TfidfVectorizer | None = None
