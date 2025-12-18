@@ -1,6 +1,6 @@
 bcrypt==4.0.1
 alembic
-psycorg2
+psycopg2
 python-dotenv
 gigachat
 litestar
