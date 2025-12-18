@@ -20,3 +20,7 @@ class DocumentRepository:
     async def add(self, document: Document) -> None:
         self.session.add(document)
         await self.session.flush()
+
+    async def delete(self, document: Document) -> None:
+        await self.session.delete(document)
+        await self.session.commit()

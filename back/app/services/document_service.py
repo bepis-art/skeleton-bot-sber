@@ -84,3 +84,17 @@ class DocumentService:
             raise ValueError("Unsupported file type")
 
         return DocumentDownload(filename=str(document.filename), mime_type=str(document.mime_type), content=raw)
+
+    async def delete(self, document_id: UUID) -> None:
+        document = await self.document_repository.get(document_id)
+
+        if not document:
+            return
+
+        content = await self.content_repository.get_by_document(document_id)
+
+        if content:
+            await self.content_repository.delete(content)
+
+        await self.document_repository.delete(document)
+        self.rag_manager.start_rebuild()

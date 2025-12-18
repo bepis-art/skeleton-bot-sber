@@ -19,6 +19,9 @@ class DocumentContentRepository:
         self.session.add(content)
         await self.session.commit()
 
+    async def delete(self, content: DocumentContent) -> None:
+        await self.session.delete(content)
+
 class DocumentContentStreamRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self.session_factory = session_factory

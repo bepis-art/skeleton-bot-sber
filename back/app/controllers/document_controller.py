@@ -1,8 +1,7 @@
 from typing import Annotated, List
 from uuid import UUID
 
-from litestar import Controller, get, Response, post, MediaType
-from litestar.datastructures import UploadFile
+from litestar import Controller, get, Response, post, delete
 from litestar.enums import RequestEncodingType
 from litestar.params import Body
 
@@ -41,3 +40,7 @@ class DocumentController(Controller):
                 "Content-Disposition": f"attachment; filename={result.filename}"
             }
         )
+
+    @delete("/{document_id:uuid}")
+    async def delete(self, document_id: UUID, document_service: DocumentService) -> None:
+        await document_service.delete(document_id)
