@@ -1,15 +1,19 @@
 import {createRouter, createWebHistory} from 'vue-router';
+import AdminPage from "@/components/pages/AdminPage.vue";
+import MainPage from "@/components/pages/MainPage.vue";
+import ChatPage from "@/components/pages/ChatPage.vue";
 
-import AppMain from "@/components/pages/AppMain.vue";
-import AppChat from "@/components/pages/AppChat.vue";
-import AdminPanel from "@/components/pages/AdminPanel.vue";
 
 const routes = [
-  { path: '/', component: AppMain },
-  { path: '/main', component: AppMain },
-  { path: '/chat', component: AppChat },
-  { path: '/admin', component: AdminPanel },
-  { path: '/:pathMatch(.*)*', redirect: '/main' }
+    { path: '/', redirect: '/main' },
+    { path: '/main', component: MainPage },
+    { path: '/chat', component: ChatPage },
+    {
+        path: '/admin',
+        name: 'AdminPage',
+        component: AdminPage,
+    },
+    { path: '/:pathMatch(.*)*', redirect: '/main' }
 ];
 
 const router = createRouter({

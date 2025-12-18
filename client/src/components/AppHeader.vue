@@ -44,12 +44,21 @@
                 <small class="text-muted nouser-select">ИИ-агент на связи</small>
             </div>
         </div>
-        <div v-if="mode === ERouteMode.ADMIN" class="d-flex align-items-center p-3 input-group-lg">
-            <button class="btn btn-link p-0 me-2" @click="goBackToMain" aria-label="Назад">
-                <i class="bi bi-arrow-left fs-4 text-orange"></i>
-            </button>
-            <div>
-                <h5 class="mb-0 nouser-select">Админ-панель: Управление файлами</h5>
+        <div v-if="mode === ERouteMode.ADMIN" class="d-flex justify-content-between w-100 p-3 input-group-lg">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link p-0 me-2" @click="goBackToMain" aria-label="Назад">
+                    <i class="bi bi-arrow-left fs-4 text-orange"></i>
+                </button>
+                <div>
+                    <h5 class="mb-0 nouser-select">Админ-панель: Управление файлами</h5>
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <BaseButton
+                    v-if="isAuthenticated"
+                    @click="onLogout"
+                    :label="'Выйти'"
+                ></BaseButton>
             </div>
         </div>
     </nav>
@@ -59,17 +68,26 @@
 import {useRouter} from 'vue-router';
 import PwaButton from "@/components/PwaButton.vue";
 import {ERouteMode} from "@/enums";
+import BaseButton from "@/components/BaseButton.vue";
+import { authService } from "@/services/auth-service.ts";
+import {computed} from "vue";
 
 defineProps<{
     mode: ERouteMode
 }>();
 
 const router = useRouter();
+const isAuthenticated = computed(() => authService.isAuthenticated());
 
-// Метод для возврата в главное меню
 const goBackToMain = () => {
     router.push('/');
 };
+
+const onLogout = () => {
+    authService.logout();
+    window.location.href = '/admin';
+}
+
 </script>
 
 <style scoped>

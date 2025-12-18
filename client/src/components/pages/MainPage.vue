@@ -36,10 +36,10 @@ export default {
                 :label="'Сообщить о проблеме'"
             />
 
-            <BaseButton
-                :label="'Админ панель'"
-                :on-click="goToAdmin"
-            />
+<!--            <BaseButton-->
+<!--                :label="'Админ панель'"-->
+<!--                :on-click="goToAdmin"-->
+<!--            />-->
 
             <span class="text-secondary nouser-select text-center">
                 Нажмите "Что делать при ЧС?" для получения помощи от ИИ-агента

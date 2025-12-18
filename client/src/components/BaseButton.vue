@@ -1,7 +1,7 @@
 <template>
     <button
         v-if="isVisible"
-        @click="handleClick"
+        @click="onClick"
         class="btn btn-danger button-orange d-flex align-items-center justify-content-center gap-1"
     >
         <slot name="icon"></slot>
@@ -25,7 +25,7 @@ const props = defineProps({
     }
 });
 
-const handleClick = (event: MouseEvent) => {
+const onClick = (event: MouseEvent) => {
     if (props.onClick) {
         props.onClick(event);
     }
