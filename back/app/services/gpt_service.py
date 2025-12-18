@@ -1,10 +1,10 @@
 import logging
-import os
 import asyncio
 import re
 
 from dotenv import load_dotenv
 from app.config.consts import *
+from app.config.settings import settings
 from app.services.rag_manager import RagManager
 
 from gigachat import GigaChat
@@ -79,8 +79,8 @@ class GptService:
     def __init__(self, rag_manager: RagManager):
         load_dotenv()
 
-        credentials = os.getenv('GIGACHAT_CREDENTIALS')
-        scope = os.getenv('SCOPE')
+        credentials = settings.gigachat_credentials
+        scope = settings.gigachat_scope
 
         if not credentials:
             raise Exception('Не установлена переменная GIGACHAT_CREDENTIALS')
