@@ -6,11 +6,28 @@ class ApiService {
      * Отправить GET запрос
      * Ошибки обрабатывать в сервисах
      */
-    async get(link: string): Promise<any> {
+    async get(link: string, options?: { responseType?: 'json' | 'text' | 'blob' }): Promise<any> {
         const client = await this.getHttpClient();
+
         return client.request(link, { method: 'GET' })
-            .then((response: Response) => response.text())
-            .then((body: string) => (!body ? {} : JSON.parse(body)));
+            .then((response: Response) => {
+                if (options?.responseType === 'blob') {
+                    return response.blob();
+                }
+
+                if (options?.responseType === 'text') {
+                    return response.text();
+                }
+
+                return response.text();
+            })
+            .then((body: Blob | string | null) => {
+                if (options?.responseType && options.responseType !== 'json') {
+                    return body;
+                }
+
+                return !body ? {} : JSON.parse(<string>body);
+            });
     }
 
     /**
@@ -19,12 +36,14 @@ class ApiService {
      */
     async post(link: string, data?: any): Promise<any> {
         const client = await this.getHttpClient()
-        const body = data ? JSON.stringify(data) : undefined;
+        const isFormData = data instanceof FormData;
+        const body = isFormData
+            ? data
+            : data
+                ? JSON.stringify(data) : undefined;
         return client.request(link, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: isFormData ? {} : { 'Content-Type': 'application/json' },
             body,
         })
             .then((response: Response) => response.text())

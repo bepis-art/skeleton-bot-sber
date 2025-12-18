@@ -221,10 +221,10 @@ const onSendMessage = async () => {
     userInput.value = '';
 
     // Отправляем сообщение через сервис
-    responseLoading.value = true;
-    const response: IMessage | null = await chatService.sendMessage(userMessage, messages.value);
     // Добавляем сообщение пользователя в чат
     messages.value.push({text: userMessage, sender: ESender.USER});
+    responseLoading.value = true;
+    const response: IMessage | null = await chatService.sendMessage(userMessage, messages.value);
     // Сохраняем сообщения в IndexedDB
     await saveMessages();
     const text = response ? response.text : 'Ошибка получения ответа.';

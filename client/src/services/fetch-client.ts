@@ -5,7 +5,6 @@ class FetchClient {
 
     async getHttpClient(): Promise<HttpClient> {
         if (!FetchClient.client) {
-            console.error("baseUrl из env: ", import.meta);
             FetchClient.client = {
                 async request(url: string, options: RequestInit = {}) {
                     const fullUrl = `${url ?? ''}`;

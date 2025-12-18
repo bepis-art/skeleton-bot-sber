@@ -5,12 +5,12 @@ import {ConfigService} from "@/services/config-service.ts";
 export class ChatService {
     async sendMessage(msg: string, history: IMessage[]): Promise<IMessage | null> {
         // fixme без хардока
-        const link: string = ConfigService.baseUrl + 'ask'
+        const link: string = ConfigService.baseUrl + 'gpt/ask'
         const mappedHistory = this.mapToHistory(history);
         return apiService.post(link, { text: msg, history: mappedHistory})
             .then((response: ApiMessage) => this.mapToMessage(response))
             .catch((error: Error) => {
-                console.log(error);
+                console.error(error);
                 return null;
             });
     }
