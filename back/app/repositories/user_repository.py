@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.entities.user import User
+from app.entities.base import User
 
 
 class UserRepository:
@@ -18,7 +18,6 @@ class UserRepository:
             select(User).where(User.login == login)
         )
 
-    async def add(self, user: User):
+    async def add(self, user: User) -> None:
         self.session.add(user)
-        await self.session.commit()
-        await self.session.refresh(user)
+        await self.session.flush()

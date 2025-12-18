@@ -2,8 +2,7 @@ from datetime import datetime, timezone
 
 from app.auth.security import get_password_hash, verify_password
 from app.auth.tokens import create_access_token, create_refresh_token
-from app.entities.refresh_token import RefreshToken
-from app.entities.user import User
+from app.entities.base import RefreshToken, User
 from app.repositories.refresh_token_repository import RefreshTokenRepository
 from app.repositories.user_repository import UserRepository
 
@@ -63,7 +62,4 @@ class AuthService:
         }
 
     async def logout(self, refresh_token: str) -> None:
-        token_obj = await self.refresh_token_repository.get(refresh_token)
-
-        if token_obj:
-            await self.refresh_token_repository.revoke(token_obj)
+        await self.refresh_token_repository.revoke(refresh_token)

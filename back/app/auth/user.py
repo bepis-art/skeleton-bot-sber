@@ -2,7 +2,7 @@ from litestar import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.tokens import decode_token
-from app.entities.user import User
+from app.entities.base import User
 
 
 async def get_current_user(

@@ -5,8 +5,8 @@ import re
 
 from dotenv import load_dotenv
 from app.config.consts import *
+from app.services.rag_manager import RagManager
 
-from app.services.rag_service import RagService
 from gigachat import GigaChat
 
 
@@ -76,7 +76,7 @@ def generate_fallback_response(rag_results: list) -> str:
 
 
 class GptService:
-    def __init__(self, rag_service: RagService):
+    def __init__(self, rag_manager: RagManager):
         load_dotenv()
 
         credentials = os.getenv('GIGACHAT_CREDENTIALS')
@@ -89,13 +89,13 @@ class GptService:
 
         self.credentials = credentials
         self.scope = scope
-        self.rag_manager = rag_service
-        self.load_instructions()
+        self.rag_manager = rag_manager
 
     async def process(self, text, history):
         relevant_instructions = []
         try:
-            relevant_instructions = self.rag_manager.search_emergency_instructions(text, max_results=3)
+            rag_service = await self.rag_manager.get()
+            relevant_instructions = rag_service.search_emergency_instructions(text, max_results=3)
         except Exception as e:
             logger.info(f"Ошибка поиска в RAG: {e}")
 
@@ -105,9 +105,6 @@ class GptService:
             history
         )
         return clean_markdown(response)
-
-    def load_instructions(self):
-        self.rag_manager.load_all_documents()
 
     def generate_gigachat_response_sync(self, user_query: str, rag_results: list, conversation_history: str = "") -> str:
         context = "БАЗА ЗНАНИЙ ПО ЧС:\n\n"
