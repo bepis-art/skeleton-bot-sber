@@ -2,7 +2,6 @@ import {ConfigService} from "@/services/config-service.ts";
 import apiService from "@/services/api-service.ts";
 import type {IFile} from "@/interfaces/front";
 import type {ApiFile} from "@/interfaces/api";
-import type {Api} from "@vitejs/plugin-vue";
 
 export class FileService {
     /**
@@ -20,6 +19,7 @@ export class FileService {
 
     /**
      * Получение одного файла
+     * @param file
      */
     async getFile(file: IFile): Promise<boolean> {
         const link: string = ConfigService.baseUrl + `document/${file.id}`
@@ -48,6 +48,7 @@ export class FileService {
 
     /**
      * Загрузка одного файла
+     * @param file
      */
     async uploadFile(file: File): Promise<IFile | null> {
         const link: string = ConfigService.baseUrl + 'document/upload'
@@ -63,6 +64,10 @@ export class FileService {
             });
     }
 
+    /**
+     * Удаление файла
+     * @param id
+     */
     async deleteFile(id: string): Promise<boolean> {
         const link: string = ConfigService.baseUrl + `document/${id}`
         return apiService.delete(link)
