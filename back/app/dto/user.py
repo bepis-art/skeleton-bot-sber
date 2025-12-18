@@ -1,6 +1,6 @@
 from pydantic import BaseModel, UUID4
 
-from app.entities.user import UserRole
+from app.entities.base import UserRole
 
 
 class UserResponse(BaseModel):

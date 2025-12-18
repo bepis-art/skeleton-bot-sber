@@ -1,65 +1,60 @@
+import asyncio
 import logging
 import os
 from typing import List, Dict, Any, Optional
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.entities.base import DocumentContent
+from app.repositories.document_content_repository import DocumentContentRepository, DocumentContentStreamRepository
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class RagService:
-    def __init__(self):
-        self.documents_path = "../../templates"
+    def __init__(self, document_content_repository: DocumentContentStreamRepository):
+        self.document_content_repository = document_content_repository
+
         self.documents: List[str] = []
         self.document_metadata: List[Dict[str, Any]] = []
         self.vectorizer: TfidfVectorizer | None = None
         self.document_vectors = None
-        
+
         logger.info("Simple RAG инициализирован")
     
-    def load_all_documents(self):
-        """Загрузка всех документов с последующим построением векторного индекса"""
-        if not os.path.exists(self.documents_path):
-            logger.error(f"Папка {self.documents_path} не найдена")
-            return False
-        
-        text_files = [f for f in os.listdir(self.documents_path) if f.endswith('.txt')]
-        logger.info(f"Найдено файлов: {len(text_files)}")
-        
+    async def load_all_documents(self):
         total_chunks = 0
-        for filename in text_files:
-            file_path = os.path.join(self.documents_path, filename)
-            try:
-                content = self.read_file_safe(file_path)
-                if not content:
+        try:
+            async for text in self.document_content_repository.stream_all():
+                if not text or len(text) == 0:
                     continue
-                
-                logger.info(f"Файл {filename} прочитан, размер: {len(content)} символов")
-                
-                chunks = self.split_content(content)
-                category = self.extract_category_from_content(content)
-                
+
+                logger.info(f"Прочитан файл размером {len(text)} символов")
+
+                chunks = self.split_content(text)
+                category = self.extract_category_from_content(text)
+
                 for i, chunk in enumerate(chunks):
                     self.documents.append(chunk)
                     self.document_metadata.append({
-                        "source": filename,
                         "chunk": i + 1,
                         "category": category,
                         "is_title": i == 0
                     })
                     total_chunks += 1
-                
-                logger.info(f"Добавлено {len(chunks)} чанков из {filename}")
-                
-            except Exception as e:
-                logger.error(f"Ошибка при загрузке {filename}: {e}")
-                continue
+
+                logger.info(f"Добавлено {len(chunks)} чанков")
+        except asyncio.CancelledError:
+            return False
         
-        logger.info(f"Всего загружено документов: {len(self.documents)}")
+        print(f"Всего загружено документов: {len(self.documents)}")
         self.build_vector_store()
+
+        print("RAG CREATED")
         return True
     
     def read_file_safe(self, file_path: str) -> str:
@@ -182,7 +177,6 @@ class RagService:
                 "content": doc_text,
                 "score": score,
                 "similarity": similarity,
-                "source": metadata["source"],
                 "category": current_category,
                 "is_title": is_title,
                 "metadata": metadata
@@ -195,7 +189,7 @@ class RagService:
             logger.info(f"Топ-5 результатов по score:")
             for i, result in enumerate(scored_results[:5], 1):
                 logger.info(f"  {i}. Score: {result['score']:.3f}, Similarity: {result['similarity']:.4f}, "
-                          f"Source: {result['source']}, Category: {result['category'][:50]}")
+                          f"Category: {result['category'][:50]}")
         
         unique_results = []
         seen_content = set()

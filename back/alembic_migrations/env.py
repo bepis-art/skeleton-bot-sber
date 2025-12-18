@@ -11,9 +11,6 @@ sys.path.append(str(Path(__file__).parent.parent / "app"))
 
 from app.config.settings import settings
 from app.entities.base import Base
-from app.entities.document import Document
-from app.entities.refresh_token import RefreshToken
-from app.entities.user import User
 
 config = context.config
 
