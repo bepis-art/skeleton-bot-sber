@@ -2,24 +2,32 @@ from typing import Annotated, List
 from uuid import UUID
 
 from litestar import Controller, get, Response, post, delete
+from litestar.di import Provide
 from litestar.enums import RequestEncodingType
+from litestar.exceptions import PermissionDeniedException
 from litestar.params import Body
 
+from app.auth.user import CurrentUser, get_current_user
 from app.dto.document import DocumentResponse
 from app.dto.multipart import MultipartData
+from app.entities.base import UserRole, User
 from app.services.document_service import DocumentService
 
 
 class DocumentController(Controller):
     path = "/document"
 
-    @get()
-    async def get_meta(self, document_service: DocumentService) -> List[DocumentResponse]:
+    @get(dependencies={"current_user": Provide(get_current_user)})
+    async def get_meta(self, document_service: DocumentService, current_user: CurrentUser) -> List[DocumentResponse]:
+        self.check_admin(await current_user.get())
+
         documents = await document_service.get_documents_meta()
         return list([DocumentResponse.model_validate(document) for document in documents])
 
-    @post("/upload")
-    async def upload(self, data: Annotated[MultipartData, Body(media_type=RequestEncodingType.MULTI_PART)], document_service: DocumentService) -> DocumentResponse:
+    @post("/upload", dependencies={"current_user": Provide(get_current_user)})
+    async def upload(self, data: Annotated[MultipartData, Body(media_type=RequestEncodingType.MULTI_PART)], document_service: DocumentService, current_user: CurrentUser) -> DocumentResponse:
+        self.check_admin(await current_user.get())
+
         file = data.file
         content: bytes = await file.read()
         filename = file.filename
@@ -29,8 +37,10 @@ class DocumentController(Controller):
 
         return DocumentResponse.model_validate(document)
 
-    @get("/{document_id:uuid}")
-    async def download(self, document_id: UUID, document_service: DocumentService) -> Response[bytes]:
+    @get("/{document_id:uuid}", dependencies={"current_user": Provide(get_current_user)})
+    async def download(self, document_id: UUID, document_service: DocumentService, current_user: CurrentUser) -> Response[bytes]:
+        self.check_admin(await current_user.get())
+
         result = await document_service.download(document_id)
 
         return Response(
@@ -41,6 +51,12 @@ class DocumentController(Controller):
             }
         )
 
-    @delete("/{document_id:uuid}")
-    async def delete(self, document_id: UUID, document_service: DocumentService) -> None:
+    @delete("/{document_id:uuid}", dependencies={"current_user": Provide(get_current_user)})
+    async def delete(self, document_id: UUID, document_service: DocumentService, current_user: CurrentUser) -> None:
+        self.check_admin(await current_user.get())
+
         await document_service.delete(document_id)
+
+    def check_admin(self, user: User):
+        if user is None or user.role != UserRole.ADMIN:
+            raise PermissionDeniedException("Forbidden")
