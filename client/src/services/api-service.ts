@@ -9,7 +9,7 @@ class ApiService {
     async get(link: string, options?: { responseType?: 'json' | 'text' | 'blob' }): Promise<any> {
         const client = await this.getHttpClient();
 
-        return client.request(link, { method: 'GET' })
+        return client.request(link, { method: 'GET', headers: { 'Authorization': `Bearer ${sessionStorage.getItem('access_token')}` } })
             .then((response: Response) => {
                 if (options?.responseType === 'blob') {
                     return response.blob();
@@ -43,7 +43,7 @@ class ApiService {
                 ? JSON.stringify(data) : undefined;
         return client.request(link, {
             method: 'POST',
-            headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+            headers: isFormData ? {'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`} : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('access_token')}` },
             body,
         })
             .then((response: Response) => response.text())
@@ -60,7 +60,7 @@ class ApiService {
         return client.request(link, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`
             },
             body,
         })
@@ -74,7 +74,7 @@ class ApiService {
      */
     async delete(link: string): Promise<any> {
         const client = await this.getHttpClient();
-        return client.request(link, { method: 'DELETE' })
+        return client.request(link, { method: 'DELETE', headers: {'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`} })
             .then((response: Response) => response.text())
             .then((body: string) => (!body ? {} : JSON.parse(body)));
     }
