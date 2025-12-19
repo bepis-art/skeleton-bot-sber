@@ -54,8 +54,6 @@ export class FileService {
         const link: string = ConfigService.baseUrl + 'document/upload'
         const formData = new FormData();
         formData.append('file', file)
-        console.log(file)
-        console.log(formData)
         return apiService.post(link, formData)
             .then((response: ApiFile) => this.mapToFile(response))
             .catch((error: Error) => {

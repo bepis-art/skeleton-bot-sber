@@ -15,6 +15,7 @@ export default {
         const showUploadModal = ref(false);
         const fileInputRef = ref<HTMLInputElement | null>(null);
         const isUploadInvalid = ref(false);
+        const isDraggingOver = ref(false);
 
         const deleteConfirmation = ref<{
             show: boolean;
@@ -88,12 +89,32 @@ export default {
             }
         };
 
-        const onFileDrop = async (event: DragEvent) => {
+        let dragCounter = 0;
+
+        function onDragEnter(event: DragEvent) {
+            event.preventDefault();
+            dragCounter++;
+            isDraggingOver.value = true;
+        }
+
+        function onDragLeave(event: DragEvent) {
+            event.preventDefault();
+            dragCounter--;
+            if (dragCounter === 0) {
+                isDraggingOver.value = false;
+            }
+        }
+
+        async function onFileDrop(event: DragEvent) {
+            event.preventDefault();
+            dragCounter = 0;
+            isDraggingOver.value = false;
+
             const file = event.dataTransfer?.files?.[0];
             if (file) {
                 await onFileAdd(file);
             }
-        };
+        }
 
         const closeUploadModal = () => {
             showUploadModal.value = false;
@@ -102,6 +123,14 @@ export default {
 
         onMounted(() => {
             loadFiles();
+
+            const preventDefaults = (e: DragEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            window.addEventListener('dragover', preventDefaults);
+            window.addEventListener('drop', preventDefaults);
         });
 
         return {
@@ -111,6 +140,7 @@ export default {
             fileInputRef,
             isUploadInvalid,
             deleteConfirmation,
+            isDraggingOver,
             onFileDelete,
             confirmDelete,
             cancelDelete,
@@ -118,6 +148,8 @@ export default {
             onFileSelected,
             onFileDrop,
             onFileDownload,
+            onDragLeave,
+            onDragEnter,
             closeUploadModal
         };
     }
@@ -178,7 +210,10 @@ export default {
 
                 <div
                     class="drop-area"
+                    :class="{ 'drag-over': isDraggingOver }"
+                    @dragenter="onDragEnter"
                     @dragover.prevent
+                    @dragleave="onDragLeave"
                     @drop="onFileDrop"
                     @click="triggerFileInput"
                 >
@@ -272,4 +307,10 @@ export default {
 .drop-area:hover {
     border-color: var(--color-orange);
 }
+
+.drop-area.drag-over {
+    border-color: var(--color-orange);
+    background-color: rgba(255, 165, 0, 0.08);
+}
+
 </style>

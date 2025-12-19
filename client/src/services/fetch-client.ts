@@ -9,7 +9,10 @@ class FetchClient {
                 async request(url: string, options: RequestInit = {}) {
                     const fullUrl = `${url ?? ''}`;
                     return fetch(fullUrl, {
-                        ...options
+                        ...options,
+                        headers: {
+                            'Authorization': `Bearer ${sessionStorage.getItem('access_token')}`
+                        },
                     });
                 }
             };
