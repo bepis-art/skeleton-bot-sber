@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, onUnmounted} from 'vue';
+import {ref, onMounted, onUnmounted, watch, nextTick} from 'vue';
 import {ChatService} from "@/services/chat-service";
 import type {IMessage} from "@/interfaces/front";
 import type {IObject} from "@/interfaces";
@@ -11,8 +11,8 @@ const chatService = new ChatService();
 const isListening = ref(false);
 const userInput = ref('');
 const recognition = ref<IObject | null>(null);
-
 const responseLoading = ref(false);
+const messagesContainer = ref<HTMLElement | null>(null);
 
 // Состояние сообщений чата
 const messages = ref<IMessage[]>([
@@ -70,6 +70,11 @@ onMounted(async () => {
     // Обработчики событий для сохранения данных
     window.addEventListener('beforeunload', saveMessages);
     window.addEventListener('pagehide', saveMessages);
+
+    if (savedMessages.length > 0) {
+        messages.value = savedMessages;
+        await scrollToBottom();
+    }
 });
 
 onUnmounted(() => {
@@ -235,12 +240,26 @@ const onSendMessage = async () => {
     await saveMessages();
     responseLoading.value = false;
 };
+
+const scrollToBottom = async () => {
+    await nextTick();
+    if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    }
+};
+
+watch(
+    () => messages.value.length,
+    () => {
+        scrollToBottom();
+    }
+);
 </script>
 
 <template>
     <div class="d-flex flex-column vh-100 overflow-hidden">
         <div class="chat-wrapper d-flex justify-content-between flex-column flex-grow-1 mx-auto h-100">
-            <div class="messages-container custom-scroll flex-grow-1 overflow-auto p-3 bg-white d-flex flex-column h-75">
+            <div ref="messagesContainer" class="messages-container custom-scroll flex-grow-1 overflow-auto p-3 bg-white d-flex flex-column h-75">
                 <div
                     v-for="(msg, index) in messages"
                     :key="index"
