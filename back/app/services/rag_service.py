@@ -24,7 +24,7 @@ class RagService:
         self.vectorizer: TfidfVectorizer | None = None
         self.document_vectors = None
 
-        logger.info("Simple RAG инициализирован")
+        print("Simple RAG инициализирован")
     
     async def load_all_documents(self):
         total_chunks = 0
@@ -33,7 +33,7 @@ class RagService:
                 if not text or len(text) == 0:
                     continue
 
-                logger.info(f"Прочитан файл размером {len(text)} символов")
+                print(f"Прочитан файл размером {len(text)} символов")
 
                 chunks = self.split_content(text)
                 category = self.extract_category_from_content(text)
@@ -47,7 +47,7 @@ class RagService:
                     })
                     total_chunks += 1
 
-                logger.info(f"Добавлено {len(chunks)} чанков")
+                print(f"Добавлено {len(chunks)} чанков")
         except asyncio.CancelledError:
             return False
         
@@ -128,7 +128,7 @@ class RagService:
         query_words = [w for w in query_lower.split() if len(w) > 2]
         
         query_variants = self.generate_query_variants(query)
-        logger.info(f"Варианты запроса: {query_variants[:5]}...")
+        # print(f"Варианты запроса: {query_variants[:5]}...")
         
         query_vector = self.vectorize_query(query_variants)
         if query_vector is None:
@@ -141,10 +141,10 @@ class RagService:
         min_similarity_threshold = 0.01
         
         expected_category = self._infer_expected_category(similarities, min_similarity_threshold)
-        if expected_category:
-            logger.info(f"Ожидаемая категория: {expected_category}")
-        else:
-            logger.info("Ожидаемая категория не выявлена")
+        # if expected_category:
+            # print(f"Ожидаемая категория: {expected_category}")
+        # else:
+            # print("Ожидаемая категория не выявлена")
         
         scored_results = []
         for idx, similarity in enumerate(similarities):
@@ -185,11 +185,11 @@ class RagService:
         scored_results.sort(key=lambda x: x["score"], reverse=True)
         
         # Логируем топ результаты для отладки
-        if scored_results:
-            logger.info(f"Топ-5 результатов по score:")
-            for i, result in enumerate(scored_results[:5], 1):
-                logger.info(f"  {i}. Score: {result['score']:.3f}, Similarity: {result['similarity']:.4f}, "
-                          f"Category: {result['category'][:50]}")
+        # if scored_results:
+            # print(f"Топ-5 результатов по score:")
+            # for i, result in enumerate(scored_results[:5], 1):
+                # print(f"  {i}. Score: {result['score']:.3f}, Similarity: {result['similarity']:.4f}, "
+                #           f"Category: {result['category'][:50]}")
         
         unique_results = []
         seen_content = set()
@@ -202,11 +202,11 @@ class RagService:
             if len(unique_results) >= max_results:
                 break
         
-        logger.info(f"Найдено {len(unique_results)} результатов для: '{query}'")
-        logger.info('Вывод инструкций >>>')
-        for instruction in unique_results:
-            logger.info(instruction)
-        logger.info('<<<')
+        # print(f"Найдено {len(unique_results)} результатов для: '{query}'")
+        # print('Вывод инструкций >>>')
+        # for instruction in unique_results:
+        #     print(instruction)
+        # print('<<<')
         
         return unique_results
     
@@ -275,7 +275,7 @@ class RagService:
             logger.warning("Нет документов для построения векторного индекса")
             return
         
-        logger.info("Строим TF-IDF индекс для базы знаний")
+        # print("Строим TF-IDF индекс для базы знаний")
         self.vectorizer = TfidfVectorizer(
             lowercase=True,
             token_pattern=r"(?u)\b[а-яa-z0-9][а-яa-z0-9]+\b",
@@ -285,7 +285,7 @@ class RagService:
             sublinear_tf=True  # Логарифмическое масштабирование TF для лучшей дискриминации
         )
         self.document_vectors = self.vectorizer.fit_transform(self.documents)
-        logger.info(f"TF-IDF индекс построен: {self.document_vectors.shape}")
+        # print(f"TF-IDF индекс построен: {self.document_vectors.shape}")
 
     def vectorize_query(self, query_variants: List[str]):
         """Преобразование запроса в векторное представление"""
@@ -310,7 +310,7 @@ class RagService:
     def _ensure_vector_store_ready(self):
         """Проверяет готовность векторного индекса, строит при необходимости"""
         if self.vectorizer is None or self.document_vectors is None:
-            logger.info("Векторное хранилище отсутствует, создаем заново")
+            # print("Векторное хранилище отсутствует, создаем заново")
             self.build_vector_store()
     
     def _infer_expected_category(self, similarities, min_threshold: float = 0.01) -> Optional[str]:

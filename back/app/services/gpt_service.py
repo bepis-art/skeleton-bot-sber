@@ -97,7 +97,7 @@ class GptService:
             rag_service = await self.rag_manager.get()
             relevant_instructions = rag_service.search_emergency_instructions(text, max_results=3)
         except Exception as e:
-            logger.info(f"Ошибка поиска в RAG: {e}")
+            print(f"Ошибка поиска в RAG: {e}")
 
         response = await self.generate_response_with_gigachat(
             text,
@@ -121,10 +121,10 @@ class GptService:
 
                 context += f"ИНСТРУКЦИЯ {i} [{category}] (релевантность: {score:.3f}):\n{content}\n\n"
 
-            logger.info(f"Найдено {len(rag_results)} релевантных инструкций")
+            print(f"Найдено {len(rag_results)} релевантных инструкций")
         else:
             context += "В базе знаний не найдено релевантных инструкций. Используй общие принципы безопасности.\n\n"
-            logger.warning(f"Не найдены релевантные инструкции")
+            print(f"Не найдены релевантные инструкции")
 
         full_prompt = f"{SYSTEM_PROMPT}\n\n"
 
@@ -140,14 +140,15 @@ class GptService:
                 verify_ssl_certs=False
             )
 
-            logger.info(f"Полный запрос:\n{full_prompt}")
+            print(f"Полный запрос:\n{full_prompt}")
             with gigachat_client:
                 response = gigachat_client.chat(full_prompt)
+                print(f"Ответ:\n{response}")
 
             return response.choices[0].message.content
 
         except Exception as e:
-            logger.error(f"Ошибка выполнения запроса к Gigachat: {e}")
+            print(f"Ошибка выполнения запроса к Gigachat: {e}")
             return generate_fallback_response(rag_results)
 
     async def generate_response_with_gigachat(self, user_query: str, rag_results: list,
